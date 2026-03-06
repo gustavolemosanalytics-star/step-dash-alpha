@@ -61,76 +61,52 @@ export interface GA4Row {
 }
 
 export async function fetchMetaAds(startDate: string, endDate: string): Promise<MetaAdsRow[]> {
-  const allData: MetaAdsRow[] = [];
-  let from = 0;
-  const PAGE_SIZE = 1000;
+  const { data, error } = await supabase
+    .from("meta_ads_step")
+    .select("*")
+    .ilike("account_name", `%${ACCOUNT_NAME}%`)
+    .gte("date", startDate)
+    .lte("date", endDate)
+    .order("date", { ascending: true })
+    .limit(10000);
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const { data, error } = await supabase
-      .from("meta_ads_step")
-      .select("*")
-      .ilike("account_name", `%${ACCOUNT_NAME}%`)
-      .gte("date", startDate)
-      .lte("date", endDate)
-      .order("date", { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
-
-    if (error || !data) break;
-    allData.push(...data);
-    if (data.length < PAGE_SIZE) break;
-    from += PAGE_SIZE;
+  if (error) {
+    console.error("Error fetching meta ads:", error);
+    return [];
   }
-
-  return allData;
+  return data || [];
 }
 
 export async function fetchGoogleAds(startDate: string, endDate: string): Promise<GoogleAdsRow[]> {
-  const allData: GoogleAdsRow[] = [];
-  let from = 0;
-  const PAGE_SIZE = 1000;
+  const { data, error } = await supabase
+    .from("google_ads_step")
+    .select("*")
+    .eq("account_name", "Rede Alpha Fitness")
+    .gte("date", startDate)
+    .lte("date", endDate)
+    .order("date", { ascending: true })
+    .limit(10000);
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const { data, error } = await supabase
-      .from("google_ads_step")
-      .select("*")
-      .eq("account_name", "Rede Alpha Fitness")
-      .gte("date", startDate)
-      .lte("date", endDate)
-      .order("date", { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
-
-    if (error || !data) break;
-    allData.push(...data);
-    if (data.length < PAGE_SIZE) break;
-    from += PAGE_SIZE;
+  if (error) {
+    console.error("Error fetching google ads:", error);
+    return [];
   }
-
-  return allData;
+  return data || [];
 }
 
 export async function fetchGA4(startDate: string, endDate: string): Promise<GA4Row[]> {
-  const allData: GA4Row[] = [];
-  let from = 0;
-  const PAGE_SIZE = 1000;
+  const { data, error } = await supabase
+    .from("ga4_ads_step")
+    .select("*")
+    .eq("account_name", "Alpha Fitness \u2013 GA4")
+    .gte("date", startDate)
+    .lte("date", endDate)
+    .order("date", { ascending: true })
+    .limit(10000);
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const { data, error } = await supabase
-      .from("ga4_ads_step")
-      .select("*")
-      .eq("account_name", "Alpha Fitness \u2013 GA4")
-      .gte("date", startDate)
-      .lte("date", endDate)
-      .order("date", { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
-
-    if (error || !data) break;
-    allData.push(...data);
-    if (data.length < PAGE_SIZE) break;
-    from += PAGE_SIZE;
+  if (error) {
+    console.error("Error fetching ga4:", error);
+    return [];
   }
-
-  return allData;
+  return data || [];
 }
