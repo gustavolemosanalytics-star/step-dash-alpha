@@ -64,7 +64,7 @@ export async function fetchMetaAds(startDate: string, endDate: string): Promise<
   const { data, error } = await supabase
     .from("meta_ads_step")
     .select("*")
-    .ilike("account_name", `%${ACCOUNT_NAME}%`)
+    .eq("account_name", `${ACCOUNT_NAME}, BRL`)
     .gte("date", startDate)
     .lte("date", endDate)
     .order("date", { ascending: true })
