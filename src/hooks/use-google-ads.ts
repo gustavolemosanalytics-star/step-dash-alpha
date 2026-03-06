@@ -84,7 +84,7 @@ function getWeeklyData(rows: GoogleAdsRow[]): GoogleAdsWeeklyData[] {
     }));
 }
 
-function groupBy<T extends Record<string, unknown>>(
+function groupBy(
   rows: GoogleAdsRow[],
   key: keyof GoogleAdsRow
 ): { name: string; impressions: number; clicks: number; spend: number; cpc: number; ctr: number }[] {
