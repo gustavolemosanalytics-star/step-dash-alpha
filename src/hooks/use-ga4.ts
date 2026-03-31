@@ -64,14 +64,20 @@ function aggregateData(rows: GA4Row[]): GA4Aggregated {
   };
 }
 
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function getWeeklyData(rows: GA4Row[]): GA4WeeklyData[] {
   const weekMap = new Map<string, { sessions: number; newusers: number }>();
 
   for (const row of rows) {
-    const date = new Date(row.date);
+    const date = parseLocalDate(row.date);
+    const day = date.getDay();
     const weekStart = new Date(date);
-    weekStart.setDate(date.getDate() - date.getDay());
-    const key = weekStart.toISOString().split("T")[0];
+    weekStart.setDate(date.getDate() - ((day === 0 ? 7 : day) - 1));
+    const key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, "0")}-${String(weekStart.getDate()).padStart(2, "0")}`;
 
     const existing = weekMap.get(key) || { sessions: 0, newusers: 0 };
     existing.sessions += row.sessions || 0;
@@ -82,7 +88,7 @@ function getWeeklyData(rows: GA4Row[]): GA4WeeklyData[] {
   return Array.from(weekMap.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([week, data]) => ({
-      week: new Date(week).toLocaleDateString("pt-BR", { day: "numeric", month: "short" }),
+      week: parseLocalDate(week).toLocaleDateString("pt-BR", { day: "numeric", month: "short" }),
       sessions: data.sessions,
       newusers: data.newusers,
     }));

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
@@ -22,6 +22,10 @@ export function Header({ title, subtitle, dateRange, onDateChange }: HeaderProps
     from: dateRange.from,
     to: dateRange.to,
   });
+
+  useEffect(() => {
+    setTempRange({ from: dateRange.from, to: dateRange.to });
+  }, [dateRange.from, dateRange.to]);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">

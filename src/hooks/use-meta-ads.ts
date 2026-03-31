@@ -80,14 +80,20 @@ function aggregateData(rows: MetaAdsRow[]): MetaAdsAggregated {
   };
 }
 
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function getWeeklyData(rows: MetaAdsRow[]): WeeklyData[] {
   const weekMap = new Map<string, { clicks: number; leads: number; spend: number }>();
 
   for (const row of rows) {
-    const date = new Date(row.date);
+    const date = parseLocalDate(row.date);
+    const day = date.getDay();
     const weekStart = new Date(date);
-    weekStart.setDate(date.getDate() - date.getDay());
-    const key = weekStart.toISOString().split("T")[0];
+    weekStart.setDate(date.getDate() - ((day === 0 ? 7 : day) - 1));
+    const key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, "0")}-${String(weekStart.getDate()).padStart(2, "0")}`;
 
     const existing = weekMap.get(key) || { clicks: 0, leads: 0, spend: 0 };
     existing.clicks += row.link_clicks || 0;
@@ -99,7 +105,7 @@ function getWeeklyData(rows: MetaAdsRow[]): WeeklyData[] {
   return Array.from(weekMap.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([week, data]) => ({
-      week: new Date(week).toLocaleDateString("pt-BR", { day: "numeric", month: "short" }),
+      week: parseLocalDate(week).toLocaleDateString("pt-BR", { day: "numeric", month: "short" }),
       clicks: data.clicks,
       leads: data.leads,
       cpl: data.leads > 0 ? data.spend / data.leads : 0,

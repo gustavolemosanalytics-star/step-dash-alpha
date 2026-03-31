@@ -60,14 +60,20 @@ function aggregateData(rows: GoogleAdsRow[]): GoogleAdsAggregated {
   };
 }
 
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function getWeeklyData(rows: GoogleAdsRow[]): GoogleAdsWeeklyData[] {
   const weekMap = new Map<string, { clicks: number; impressions: number }>();
 
   for (const row of rows) {
-    const date = new Date(row.date);
+    const date = parseLocalDate(row.date);
+    const day = date.getDay();
     const weekStart = new Date(date);
-    weekStart.setDate(date.getDate() - date.getDay());
-    const key = weekStart.toISOString().split("T")[0];
+    weekStart.setDate(date.getDate() - ((day === 0 ? 7 : day) - 1));
+    const key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, "0")}-${String(weekStart.getDate()).padStart(2, "0")}`;
 
     const existing = weekMap.get(key) || { clicks: 0, impressions: 0 };
     existing.clicks += row.clicks || 0;
@@ -78,7 +84,7 @@ function getWeeklyData(rows: GoogleAdsRow[]): GoogleAdsWeeklyData[] {
   return Array.from(weekMap.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([week, data]) => ({
-      week: new Date(week).toLocaleDateString("pt-BR", { day: "numeric", month: "short" }),
+      week: parseLocalDate(week).toLocaleDateString("pt-BR", { day: "numeric", month: "short" }),
       clicks: data.clicks,
       impressions: data.impressions,
     }));

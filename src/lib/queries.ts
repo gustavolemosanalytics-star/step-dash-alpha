@@ -1,5 +1,11 @@
 import { supabase, ACCOUNT_NAME } from "./supabase";
 
+function nextDay(dateStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const next = new Date(y, m - 1, d + 1);
+  return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-${String(next.getDate()).padStart(2, "0")}`;
+}
+
 export interface MetaAdsRow {
   account_name: string;
   campaign: string;
@@ -66,7 +72,7 @@ export async function fetchMetaAds(startDate: string, endDate: string): Promise<
     .select("*")
     .eq("account_name", `${ACCOUNT_NAME}, BRL`)
     .gte("date", startDate)
-    .lte("date", endDate)
+    .lt("date", nextDay(endDate))
     .order("date", { ascending: true })
     .limit(10000);
 
@@ -83,7 +89,7 @@ export async function fetchGoogleAds(startDate: string, endDate: string): Promis
     .select("*")
     .eq("account_name", "Rede Alpha Fitness")
     .gte("date", startDate)
-    .lte("date", endDate)
+    .lt("date", nextDay(endDate))
     .order("date", { ascending: true })
     .limit(10000);
 
@@ -100,7 +106,7 @@ export async function fetchGA4(startDate: string, endDate: string): Promise<GA4R
     .select("*")
     .eq("account_name", "Alpha Fitness \u2013 GA4")
     .gte("date", startDate)
-    .lte("date", endDate)
+    .lt("date", nextDay(endDate))
     .order("date", { ascending: true })
     .limit(10000);
 
